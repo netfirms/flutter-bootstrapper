@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter BLoC Demo',
+      title: 'Flutter SpringBoard',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),

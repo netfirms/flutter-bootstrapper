@@ -11,10 +11,7 @@ class FormDemoBloc extends Bloc<FormDemoEvent, FormDemoState> {
   Stream<FormDemoState> mapEventToState(FormDemoEvent event) async* {
     if (event is UpdateForm) {
       yield FormDemoLoading();
-      print("FormLoad:");
-      print(event);
       yield FormDemoLoaded(event.formDemo);
-      print("FormLoaded:");
     }
   }
 }
