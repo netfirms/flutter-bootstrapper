@@ -1,8 +1,10 @@
+import 'package:bloc_updated_tutorial/model/form_demo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'bloc/bloc.dart';
 import 'model/weather.dart';
+import 'package:bloc_updated_tutorial/bloc/form_bloc/form_state.dart' as f1;
 
 void main() => runApp(MyApp());
 
@@ -10,7 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Flutter BLoC Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -27,12 +29,18 @@ class WeatherPage extends StatelessWidget {
       appBar: AppBar(
         title: Text("Fake Weather App"),
       ),
-      // BlocProvider is an InheritedWidget for Blocs
-      body: BlocProvider(
-        // This bloc can now be accessed from CityInputField
-        // It is now automatically disposed (since 0.17.0)
-        builder: (context) => WeatherBloc(),
-        child: WeatherPageChild(),
+      body: SingleChildScrollView(
+        child: MultiBlocProvider(
+          providers: [
+            BlocProvider<WeatherBloc>(
+              builder: (context) => WeatherBloc(),
+            ),
+            BlocProvider<FormDemoBloc>(
+              builder: (context) => FormDemoBloc(),
+            ),
+          ],
+          child: WeatherPageChild(),
+        ),
       ),
     );
   }
@@ -48,36 +56,62 @@ class WeatherPageChild extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 16),
-      alignment: Alignment.center,
-      // BlocListener invokes the listener when new state is emitted.
-      child: BlocListener(
-        bloc: BlocProvider.of<WeatherBloc>(context),
-        // Listener is the place for logging, showing Snackbars, navigating, etc.
-        // It is guaranteed to run only once per state change.
-        listener: (BuildContext context, WeatherState state) {
-          if (state is WeatherLoaded) {
-            print("Loaded: ${state.weather.cityName}");
-          }
-        },
-        // BlocBuilder invokes the builder when new state is emitted.
-        child: BlocBuilder(
-          bloc: BlocProvider.of<WeatherBloc>(context),
-          // The builder function has to be a "pure function".
-          // That is, it only returns a Widget and doesn't do anything else.
-          builder: (BuildContext context, WeatherState state) {
-            // Changing the UI based on the current state
-            if (state is WeatherInitial) {
-              return buildInitialInput();
-            } else if (state is WeatherLoading) {
-              return buildLoading();
-            } else if (state is WeatherLoaded) {
-              return buildColumnWithData(state.weather);
-            }
-          },
+    return Column(
+      children: <Widget>[
+        Container(
+          padding: EdgeInsets.symmetric(vertical: 16),
+          alignment: Alignment.center,
+          child: BlocListener(
+            bloc: BlocProvider.of<FormDemoBloc>(context),
+            listener: (BuildContext context, FormDemoState state) async {
+              if (state is FormDemoLoaded) {
+                print("Loaded: ${state.props.toString()}");
+              }
+            },
+            // BlocBuilder invokes the builder when new state is emitted.
+            child: BlocBuilder(
+              bloc: BlocProvider.of<FormDemoBloc>(context),
+              builder: (BuildContext context, FormDemoState state) {
+                if (state is FormDemoLoaded) {
+                  return (Text(
+                      "Form Data: ${state.formDemo.name} : ${state.formDemo.lastName}"));
+                }
+              },
+            ),
+          ),
         ),
-      ),
+        Container(
+          padding: EdgeInsets.symmetric(vertical: 16),
+          alignment: Alignment.center,
+          // BlocListener invokes the listener when new state is emitted.
+          child: BlocListener(
+            bloc: BlocProvider.of<WeatherBloc>(context),
+            // Listener is the place for logging, showing Snackbars, navigating, etc.
+            // It is guaranteed to run only once per state change.
+            listener: (BuildContext context, WeatherState state) {
+              if (state is WeatherLoaded) {
+                print("Loaded: ${state.weather.cityName}");
+              }
+            },
+            // BlocBuilder invokes the builder when new state is emitted.
+            child: BlocBuilder(
+              bloc: BlocProvider.of<WeatherBloc>(context),
+              // The builder function has to be a "pure function".
+              // That is, it only returns a Widget and doesn't do anything else.
+              builder: (BuildContext context, WeatherState state) {
+                // Changing the UI based on the current state
+                if (state is WeatherInitial) {
+                  return buildInitialInput();
+                } else if (state is WeatherLoading) {
+                  return buildLoading();
+                } else if (state is WeatherLoaded) {
+                  return buildColumnWithData(state.weather);
+                }
+              },
+            ),
+          ),
+        )
+      ],
     );
   }
 
@@ -147,5 +181,8 @@ class _CityInputFieldState extends State<CityInputField> {
     final weatherBloc = BlocProvider.of<WeatherBloc>(context);
     // Initiate getting the weather
     weatherBloc.dispatch(GetWeather(cityName));
+    final formDemoBloc = BlocProvider.of<FormDemoBloc>(context);
+    formDemoBloc.dispatch(UpdateForm(new FormDemo(
+        name: "${cityName} FirstName", lastName: "${cityName} LastName")));
   }
 }

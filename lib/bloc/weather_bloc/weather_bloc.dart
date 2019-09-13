@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:bloc/bloc.dart';
 import 'package:bloc_updated_tutorial/model/weather.dart';
-import './bloc.dart';
+import '../bloc.dart';
 
 class WeatherBloc extends Bloc<WeatherEvent, WeatherState> {
   @override

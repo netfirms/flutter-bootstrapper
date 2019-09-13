@@ -11,7 +11,6 @@ class WeatherInitial extends WeatherState {}
 
 class WeatherLoading extends WeatherState {}
 
-// Only the WeatherLoaded event needs to contain data
 class WeatherLoaded extends WeatherState {
   final Weather weather;
 
